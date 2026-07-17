@@ -1,0 +1,31 @@
+<%- include('partials/header', { pageTitle: 'Register' }) %>
+
+<main class="container py-5">
+    <div class="card shadow-sm form-card">
+        <div class="card-body p-4">
+            <h1 class="h3 mb-4">Create an account</h1>
+            <form action="/register" method="POST">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" value="<%= formData.username || '' %>" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" value="<%= formData.email || '' %>" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" minlength="6" required>
+                </div>
+                <div class="mb-4">
+                    <label for="contact" class="form-label">Contact number</label>
+                    <input type="text" class="form-control" id="contact" name="contact" value="<%= formData.contact || '' %>" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Register</button>
+                <a href="/login" class="btn btn-link">Already have an account?</a>
+            </form>
+        </div>
+    </div>
+</main>
+
+<%- include('partials/footer') %>

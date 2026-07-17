@@ -1,0 +1,58 @@
+<%- include('partials/header', { pageTitle: 'Edit Trip' }) %>
+
+<main class="container py-4">
+    <div class="card shadow-sm form-card">
+        <div class="card-body p-4">
+            <h1 class="h3 mb-4">Edit Trip</h1>
+            <form action="/trips/<%= trip.tripId %>/edit" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label" for="tripName">Trip name</label>
+                    <input class="form-control" id="tripName" name="tripName" value="<%= trip.tripName %>" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="destination">Destination</label>
+                    <input class="form-control" id="destination" name="destination" value="<%= trip.destination %>" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="startDate">Start date</label>
+                        <input type="date" class="form-control" id="startDate" name="startDate" value="<%= new Date(trip.startDate).toISOString().split('T')[0] %>" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="endDate">End date</label>
+                        <input type="date" class="form-control" id="endDate" name="endDate" value="<%= new Date(trip.endDate).toISOString().split('T')[0] %>" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="budget">Budget ($)</label>
+                        <input type="number" min="0" step="0.01" class="form-control" id="budget" name="budget" value="<%= trip.budget %>" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="status">Status</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <% ['Planning', 'Confirmed', 'Completed', 'Cancelled'].forEach((option) => { %>
+                                <option value="<%= option %>" <%= trip.status === option ? 'selected' : '' %>><%= option %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="description">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4"><%= trip.description || '' %></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label" for="image">Replace trip image</label>
+                    <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                    <% if (trip.image) { %>
+                        <img src="/images/<%= trip.image %>" class="img-thumbnail mt-3" width="180" alt="Current trip image">
+                    <% } %>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="/trips/<%= trip.tripId %>" class="btn btn-outline-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</main>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,23 @@
+<%- include('partials/header', { pageTitle: 'Login' }) %>
+
+<main class="container py-5">
+    <div class="card shadow-sm form-card">
+        <div class="card-body p-4">
+            <h1 class="h3 mb-4">Login to TripyGuys</h1>
+            <form action="/login" method="POST">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <a href="/register" class="btn btn-link">Create an account</a>
+            </form>
+        </div>
+    </div>
+</main>
+
+<%- include('partials/footer') %>

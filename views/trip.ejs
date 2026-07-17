@@ -1,0 +1,34 @@
+<%- include('partials/header', { pageTitle: trip.tripName }) %>
+
+<main class="container py-4">
+    <div class="card shadow-sm detail-card">
+        <% if (trip.image) { %>
+            <img src="/images/<%= trip.image %>" class="trip-image card-img-top" alt="<%= trip.tripName %>">
+        <% } %>
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+                <h1 class="h2"><%= trip.tripName %></h1>
+                <span class="badge text-bg-secondary"><%= trip.status %></span>
+            </div>
+            <dl class="row mt-4">
+                <dt class="col-sm-4">Destination</dt>
+                <dd class="col-sm-8"><%= trip.destination %></dd>
+                <dt class="col-sm-4">Start date</dt>
+                <dd class="col-sm-8"><%= new Date(trip.startDate).toLocaleDateString('en-SG') %></dd>
+                <dt class="col-sm-4">End date</dt>
+                <dd class="col-sm-8"><%= new Date(trip.endDate).toLocaleDateString('en-SG') %></dd>
+                <dt class="col-sm-4">Budget</dt>
+                <dd class="col-sm-8">$<%= Number(trip.budget).toFixed(2) %></dd>
+                <dt class="col-sm-4">Description</dt>
+                <dd class="col-sm-8"><%= trip.description || 'No description provided.' %></dd>
+            </dl>
+            <a href="/trips/<%= trip.tripId %>/edit" class="btn btn-primary">Edit Trip</a>
+            <form action="/trips/<%= trip.tripId %>/delete" method="POST" class="d-inline" onsubmit="return confirm('Delete this trip?');">
+                <button type="submit" class="btn btn-danger">Delete Trip</button>
+            </form>
+            <a href="<%= user.role === 'admin' ? '/admin/trips' : '/trips' %>" class="btn btn-outline-secondary">Back</a>
+        </div>
+    </div>
+</main>
+
+<%- include('partials/footer') %>

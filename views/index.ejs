@@ -1,0 +1,33 @@
+<%- include('partials/header', { pageTitle: 'Home' }) %>
+
+<main class="container hero">
+    <div class="row align-items-center g-5">
+        <div class="col-lg-7">
+            <p class="text-uppercase fw-semibold text-secondary">Travel and experience planning</p>
+            <h1 class="display-4 fw-bold">Plan every trip in one organised place.</h1>
+            <p class="lead text-secondary">Create trips, track dates and budgets, and manage your travel plans with TripMate.</p>
+            <% if (!user) { %>
+                <a href="/register" class="btn btn-primary btn-lg me-2">Create Account</a>
+                <a href="/login" class="btn btn-outline-dark btn-lg">Login</a>
+            <% } else { %>
+                <a href="<%= user.role === 'admin' ? '/admin/trips' : '/trips' %>" class="btn btn-primary btn-lg">View Trips</a>
+            <% } %>
+        </div>
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h2 class="h4">Starter features</h2>
+                    <ul class="mb-0">
+                        <li>Registration and login</li>
+                        <li>User and administrator roles</li>
+                        <li>Trip CRUD operations</li>
+                        <li>Search and status filtering</li>
+                        <li>Image uploads</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include('partials/footer') %>
