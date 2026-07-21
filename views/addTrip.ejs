@@ -3,33 +3,35 @@
 <main class="container py-4">
     <div class="card shadow-sm form-card">
         <div class="card-body p-4">
-            <h1 class="h3 mb-4">Create a New Trip</h1>
+            <div class="bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded-3 p-3 mb-4">
+                <h1 class="h3 mb-0 fw-bold text-primary">Create a New Trip</h1>
+            </div>
             <form action="/trips/add" method="POST" enctype="multipart/form-data">
                 <div class="mb-3">
-                    <label class="form-label" for="tripName">Trip name</label>
-                    <input class="form-control" id="tripName" name="tripName" required>
+                    <label class="form-label fw-semibold" for="tripName">Trip name</label>
+                    <input class="form-control" id="tripName" name="tripName" placeholder="e.g. Summer in Bali" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="destination">Destination</label>
-                    <input class="form-control" id="destination" name="destination" required>
+                    <label class="form-label fw-semibold" for="destination">Destination</label>
+                    <input class="form-control" id="destination" name="destination" placeholder="e.g. Bali, Indonesia" required>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label" for="startDate">Start date</label>
+                        <label class="form-label fw-semibold" for="startDate">Start date</label>
                         <input type="date" class="form-control" id="startDate" name="startDate" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label" for="endDate">End date</label>
+                        <label class="form-label fw-semibold" for="endDate">End date</label>
                         <input type="date" class="form-control" id="endDate" name="endDate" required>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label" for="budget">Budget ($)</label>
-                        <input type="number" min="0" step="0.01" class="form-control" id="budget" name="budget" required>
+                        <label class="form-label fw-semibold" for="budget">Budget ($)</label>
+                        <input type="number" min="0" step="0.01" class="form-control" id="budget" name="budget" placeholder="e.g. 1500" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label" for="status">Status</label>
+                        <label class="form-label fw-semibold" for="status">Status</label>
                         <select class="form-select" id="status" name="status" required>
                             <option value="Planning">Planning</option>
                             <option value="Confirmed">Confirmed</option>
@@ -39,15 +41,16 @@
                     </div>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="description">Description</label>
-                    <textarea class="form-control" id="description" name="description" rows="4"></textarea>
+                    <label class="form-label fw-semibold" for="description">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4" placeholder="e.g. A relaxing week exploring beaches, temples, and local food."></textarea>
                 </div>
                 <div class="mb-4">
-                    <label class="form-label" for="image">Trip image</label>
+                    <label class="form-label fw-semibold" for="image">Trip image</label>
                     <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                    <div class="form-text">Accepted formats: PNG or JPG.</div>
                 </div>
-                <button type="submit" class="btn btn-primary">Create Trip</button>
-                <a href="/trips" class="btn btn-outline-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary fw-semibold px-4">Create Trip</button>
+                <a href="/trips" class="btn btn-outline-secondary fw-semibold px-4">Cancel</a>
             </form>
         </div>
     </div>
