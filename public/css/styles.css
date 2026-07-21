@@ -29,3 +29,12 @@ body {
     max-width: 760px;
     margin: 0 auto;
 }
+
+.delete-btn {
+    min-width: 100px;
+}
+
+.delete-form {
+    display: inline-block;
+    margin: 0;
+}
