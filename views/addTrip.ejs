@@ -13,7 +13,28 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-semibold" for="destination">Destination</label>
-                    <input class="form-control" id="destination" name="destination" placeholder="e.g. Bali, Indonesia" required>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="destination" name="destination" placeholder="e.g. Bali, Indonesia" autocomplete="off" required>
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Countries
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item">Brunei</a></li>
+                            <li><a class="dropdown-item">Cambodia</a></li>
+                            <li><a class="dropdown-item">Indonesia</a></li>
+                            <li><a class="dropdown-item">Japan</a></li>
+                            <li><a class="dropdown-item">Laos</a></li>
+                            <li><a class="dropdown-item">Malaysia</a></li>
+                            <li><a class="dropdown-item">Mongolia</a></li>
+                            <li><a class="dropdown-item">Myanmar</a></li>
+                            <li><a class="dropdown-item">Philippines</a></li>
+                            <li><a class="dropdown-item">Singapore</a></li>
+                            <li><a class="dropdown-item">South Korea</a></li>
+                            <li><a class="dropdown-item">Taiwan</a></li>
+                            <li><a class="dropdown-item">Thailand</a></li>
+                            <li><a class="dropdown-item">Vietnam</a></li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -28,7 +49,7 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-semibold" for="budget">Budget ($)</label>
-                        <input type="number" min="0" step="100" class="form-control" id="budget" name="budget" placeholder="e.g. 1500" required>
+                        <input type="number" min="0" step="0.01" class="form-control" id="budget" name="budget" placeholder="e.g. 1500" required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-semibold" for="status">Status</label>
@@ -55,5 +76,14 @@
         </div>
     </div>
 </main>
+<script>
+    // Fill the destination input when a country is picked from the dropdown.
+    document.querySelectorAll('.dropdown-item').forEach(function (item) {
+        item.addEventListener('click', function (country) {
+            country.preventDefault();
+            document.getElementById('destination').value = item.textContent;
+        });
+    });
+</script>
 
 <%- include('partials/footer') %>
