@@ -1,0 +1,66 @@
+<%- include('partials/header', { pageTitle: 'Community' }) %>
+
+<main class="container py-4">
+
+    <div class="d-flex justify-content-between mb-4">
+        <h1>Community Posts</h1>
+
+        <a href="/community/add" class="btn btn-primary">
+            Create Post
+        </a>
+    </div>
+
+    <form method="GET" action="/community" class="row g-2 mb-4">
+        <div class="col-md-8">
+            <input type="text" name="destination" class="form-control" placeholder="Filter by destination" value="<%= destination %>">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-dark w-100">Search</button>
+        </div>
+        <div class="col-md-2">
+            <a href="/community" class="btn btn-outline-dark w-100">Reset</a>
+        </div>
+    </form>
+
+    <% if(posts.length === 0) { %>
+
+        <div class="alert alert-info">
+            No posts yet.
+        </div>
+
+    <% } else { %>
+
+        <% posts.forEach(post => { %>
+
+            <div class="card mb-3">
+
+                <div class="card-body">
+
+                    <h3><%= post.title %></h3>
+
+                    <p>
+                        <strong>Destination:</strong>
+                        <%= post.destination %>
+                    </p>
+
+                    <p>
+                        Posted by <%= post.username %>
+                    </p>
+
+                    <p>
+                        👍 <%= post.thumbsUp %> &nbsp; 👎 <%= post.thumbsDown %>
+                    </p>
+
+                    <a href="/community/<%= post.postId %>">View Post</a>
+
+                </div>
+
+            </div>
+
+        <% }) %>
+
+    <% } %>
+
+</main>
+
+<%- include('partials/footer') %>

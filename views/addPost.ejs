@@ -1,0 +1,31 @@
+<%- include('partials/header', { pageTitle: 'Create Post' }) %>
+
+<main class="container py-4">
+
+    <h1 class="mb-4">Create Post</h1>
+
+    <form method="POST" action="/community/add">
+
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Destination</label>
+            <input type="text" name="destination" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Your Experience</label>
+            <textarea name="postContent" class="form-control" rows="5"></textarea>
+        </div>
+
+        <a href="/community" class="btn btn-outline-dark">Cancel</a>
+        <button type="submit" class="btn btn-primary">Post</button>
+
+    </form>
+
+</main>
+
+<%- include('partials/footer') %>
