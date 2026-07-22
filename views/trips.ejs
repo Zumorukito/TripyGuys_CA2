@@ -25,6 +25,16 @@
                 </select>
             </div>
             <div class="col-md-3">
+                <select class="form-select" name="budgetRange">
+                    <option value="">All Budgets</option>
+                    <option value="0-1000" <%= budgetRange === '0-1000' ? 'selected' : '' %>>0 - 1000</option>
+                    <option value="1001-2000" <%= budgetRange === '1001-2000' ? 'selected' : '' %>>1001 - 2000</option>
+                    <option value="2001-3000" <%= budgetRange === '2001-3000' ? 'selected' : '' %>>2001 - 3000</option>
+                    <option value="3001-5000" <%= budgetRange === '3001-5000' ? 'selected' : '' %>>3001 - 5000</option>
+                    <option value="5001-+" <%= budgetRange === '5001-+' ? 'selected' : '' %>>5001 and above</option>
+                </select>
+            </div>
+            <div class="col-md-3">
                 <button class="btn btn-dark" type="submit">Search</button>
                 <a class="btn btn-outline-secondary" href="/trips">Reset</a>
             </div>
