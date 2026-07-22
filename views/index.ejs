@@ -25,7 +25,7 @@
                         trip's current status.
                     </p>
 
-                    <ul class="mb-0">
+                    <ul class="feature-list mb-0">
                         <li>Secure registration and login</li>
                         <li>User and administrator roles</li>
                         <li>Create, view, update and delete trips</li>
@@ -37,5 +37,50 @@
         </div>
     </div>
 </main>
+
+<section class="page-panel container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="page-title mb-0">Dashboard</h3>
+        <a href="<%= user ? (user.role === 'admin' ? '/admin/trips' : '/trips') : '/login' %>" class="btn btn-primary">Go to Trips</a>
+    </div>
+
+    <div class="row stats-grid g-3">
+        <div class="col-6 col-md-3">
+            <div class="stat-card p-3">
+                <div class="stat-label text-muted">All trips</div>
+                <% if (user) { %>
+                    <a href="<%= user.role === 'admin' ? '/admin/trips' : '/trips' %>" class="stat-value">View trips</a>
+                <% } else { %>
+                    <div class="stat-value text-muted">Sign in to view</div>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="stat-card p-3">
+                <div class="stat-label text-muted">Upcoming</div>
+                <% if (user) { %>
+                    <a href="/trips?status=Confirmed" class="stat-value">See upcoming</a>
+                <% } else { %>
+                    <div class="stat-value text-muted">Sign in to view</div>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="stat-card p-3">
+                <div class="stat-label text-muted">Budget (total)</div>
+                <div class="stat-value text-muted">—</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="stat-card p-3">
+                <div class="stat-label text-muted">Completed</div>
+                <div class="stat-value text-muted">—</div>
+            </div>
+        </div>
+    </div>
+</section>
 
 <%- include('partials/footer') %>
