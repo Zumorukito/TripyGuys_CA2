@@ -212,6 +212,9 @@ app.get('/logout', (req, res) => {
 app.get('/trips', checkAuthenticated, (req, res) => {
     const search = (req.query.search || '').trim();
     const status = (req.query.status || '').trim();
+    const budgetRange = (req.query.budgetRange || '').trim();
+
+    console.log("Selected budget:", budgetRange);
 
     let sql = 'SELECT * FROM trips WHERE userId = ?';
     const params = [req.session.user.userId];
@@ -225,8 +228,29 @@ app.get('/trips', checkAuthenticated, (req, res) => {
         sql += ' AND status = ?';
         params.push(status);
     }
+    
+    if (budgetRange === '0-1000') {
+        sql += ' AND budget BETWEEN ? AND ?';
+        params.push(0, 1000);
+    } else if (budgetRange === '1001-2000') {
+        sql += ' AND budget BETWEEN ? AND ?';
+        params.push(1001, 2000);
+    } else if (budgetRange === '2001-3000') {
+        sql += ' AND budget BETWEEN ? AND ?';
+        params.push(2001, 3000);
+    } else if (budgetRange === '3001-5000') {
+        sql += ' AND budget BETWEEN ? AND ?';
+        params.push(3001, 5000);
+    } else if (budgetRange === '5001-+') {
+        sql += ' AND budget >= ?';
+        params.push(5001);
+    }
 
     sql += ' ORDER BY startDate ASC';
+
+    console.log("Budget Range:", budgetRange);
+    console.log("SQL:", sql);
+    console.log("Params:", params);
 
     connection.query(sql, params, (error, results) => {
         if (error) {
@@ -234,7 +258,7 @@ app.get('/trips', checkAuthenticated, (req, res) => {
             return res.status(500).send('Unable to load trips.');
         }
 
-        res.render('trips', { trips: results, search, status, isAdminView: false });
+        res.render('trips', { trips: results, search, status, budgetRange, isAdminView: false });
     });
 });
 
@@ -257,6 +281,7 @@ app.get('/admin/trips', checkAuthenticated, checkAdmin, (req, res) => {
             trips: results,
             search: '',
             status: '',
+            budgetRange: '',
             isAdminView: true
         });
     });

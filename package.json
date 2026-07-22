@@ -16,6 +16,14 @@
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "multer": "^2.2.0",
-    "mysql2": "^3.23.0"
-  }
+    "mysql2": "^3.23.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zumorukito/TripyGuys_CA2.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Zumorukito/TripyGuys_CA2/issues"
+  },
+  "homepage": "https://github.com/Zumorukito/TripyGuys_CA2#readme"
 }
