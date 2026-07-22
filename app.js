@@ -7,6 +7,8 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const SUPPORT_WEBHOOK_URL = process.env.SUPPORT_WEBHOOK_URL || 'https://n8ngc.codeblazar.org/webhook/customer-support-message-';
+const SUPPORT_STATUS_WEBHOOK_URL = process.env.SUPPORT_STATUS_WEBHOOK_URL || 'https://n8ngc.codeblazar.org/webhook/customer-support-status-';
 
 // Image upload setup
 const storage = multer.diskStorage({
@@ -25,7 +27,7 @@ const upload = multer({ storage });
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'RP738964$',
+    password: 'JayChou1234@',
     database: 'tripyguys_db'
 });
 
@@ -40,6 +42,7 @@ connection.connect((err) => {
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 app.use(session({
     secret: process.env.SESSION_SECRET || 'tripmate-school-project-secret',
@@ -124,6 +127,127 @@ const checkTripAccess = (req, res, next) => {
 // Home
 app.get('/', (req, res) => {
     res.render('index');
+});
+
+// Chatbot message webhook
+app.post('/chatbot-message', async (req, res) => {
+    const { message, sessionId } = req.body;
+
+    if (!message || !String(message).trim()) {
+        return res.status(400).json({ error: 'Message is required.' });
+    }
+
+    const chatSessionId = String(
+        sessionId ||
+        (req.session.user ? `user_${req.session.user.userId}` : `guest_${Date.now()}`)
+    ).trim();
+
+    try {
+        const webhookResponse = await fetch(SUPPORT_WEBHOOK_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: String(message).trim(),
+                sessionId: chatSessionId,
+                userId: req.session.user ? req.session.user.userId : null,
+                username: req.session.user ? req.session.user.username : 'Guest',
+                sentAt: new Date().toISOString(),
+                source: 'TripyGuys chatbot'
+            })
+        });
+
+        if (!webhookResponse.ok) {
+            throw new Error(`Webhook returned status ${webhookResponse.status}`);
+        }
+
+        const contentType = webhookResponse.headers.get('content-type') || '';
+        let botReply = 'Webhook received your message, but chatbot returned no reply text.';
+        let status = 'answered';
+        let ticketId = null;
+        const rawBody = await webhookResponse.text();
+        const trimmedBody = rawBody ? rawBody.trim() : '';
+
+        if (trimmedBody) {
+            if (contentType.includes('application/json')) {
+                try {
+                    const data = JSON.parse(trimmedBody);
+
+                    if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
+                        status = data[0].status || status;
+                        ticketId = data[0].ticketId || null;
+                        botReply =
+                            data[0].reply ||
+                            data[0].response ||
+                            data[0].message ||
+                            data[0].output ||
+                            data[0].text ||
+                            JSON.stringify(data[0]);
+                    } else if (data && typeof data === 'object') {
+                        status = data.status || status;
+                        ticketId = data.ticketId || null;
+                        botReply =
+                            data.reply ||
+                            data.response ||
+                            data.message ||
+                            data.output ||
+                            data.text ||
+                            JSON.stringify(data);
+                    } else {
+                        botReply = String(data);
+                    }
+                } catch {
+                    botReply = trimmedBody;
+                }
+            } else {
+                botReply = trimmedBody;
+            }
+        }
+
+        return res.json({
+            reply: botReply,
+            status,
+            ticketId,
+            sessionId: chatSessionId
+        });
+    } catch (error) {
+        console.error('Chatbot webhook error:', error);
+        return res.status(500).json({ error: 'Unable to reach chatbot right now. Please try again.' });
+    }
+});
+
+// Polls n8n customer reply status for human-agent responses.
+app.get('/chatbot-reply-status', async (req, res) => {
+    const sessionId = String(req.query.sessionId || '').trim();
+    const ticketId = String(req.query.ticketId || '').trim();
+
+    if (!sessionId || !ticketId) {
+        return res.status(400).json({ error: 'sessionId and ticketId are required.' });
+    }
+
+    try {
+        const url = new URL(SUPPORT_STATUS_WEBHOOK_URL);
+        url.searchParams.set('sessionId', sessionId);
+        url.searchParams.set('ticketId', ticketId);
+
+        const webhookResponse = await fetch(url.toString(), { method: 'GET' });
+        if (!webhookResponse.ok) {
+            throw new Error(`Status webhook returned ${webhookResponse.status}`);
+        }
+
+        const contentType = webhookResponse.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+            const data = await webhookResponse.json();
+            return res.json(data);
+        }
+
+        const text = (await webhookResponse.text()).trim();
+        return res.json({ status: 'unknown', reply: text || null });
+    } catch (error) {
+        console.error('Chatbot status webhook error:', error);
+        return res.status(500).json({ error: 'Unable to check reply status right now.' });
+    }
 });
 
 // Registration

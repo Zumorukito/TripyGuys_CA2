@@ -1,3 +1,135 @@
+<button id="tripyguysChatToggle" class="tripyguys-chat-toggle" type="button" aria-label="Open TripyGuys Chat Bot">
+	TripyGuys Chat Bot
+</button>
+
+<section id="tripyguysChatPopup" class="tripyguys-chat-popup d-none" aria-label="TripyGuys Chat Bot window">
+	<header class="tripyguys-chat-header">
+		<h2 class="h6 mb-0">TripyGuys Chat Bot</h2>
+		<button id="tripyguysChatClose" type="button" class="btn-close btn-close-white" aria-label="Close chatbot"></button>
+	</header>
+
+	<div id="tripyguysChatMessages" class="tripyguys-chat-messages">
+		<p class="text-muted small mb-0">Hi, I am TripyGuys Chat Bot. Ask me anything about this website.</p>
+	</div>
+
+	<form id="tripyguysChatForm" class="tripyguys-chat-form">
+		<input id="tripyguysChatInput" type="text" class="form-control" placeholder="Type your message..." required>
+		<button type="submit" class="btn btn-dark">Send</button>
+	</form>
+</section>
+
+<script>
+	(() => {
+		const toggleButton = document.getElementById('tripyguysChatToggle');
+		const closeButton = document.getElementById('tripyguysChatClose');
+		const popup = document.getElementById('tripyguysChatPopup');
+		const form = document.getElementById('tripyguysChatForm');
+		const input = document.getElementById('tripyguysChatInput');
+		const messages = document.getElementById('tripyguysChatMessages');
+		const sessionStorageKey = 'tripyguys_chat_session_id';
+		const sessionId = localStorage.getItem(sessionStorageKey) || `web_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+		localStorage.setItem(sessionStorageKey, sessionId);
+
+		let waitingTicketId = null;
+		let statusPollInterval = null;
+		const shownHumanReplies = new Set();
+
+		if (!toggleButton || !closeButton || !popup || !form || !input || !messages) {
+			return;
+		}
+
+		const appendMessage = (sender, text) => {
+			const row = document.createElement('div');
+			row.className = 'tripyguys-chat-line';
+			row.innerHTML = `<strong>${sender}:</strong> ${text}`;
+			messages.appendChild(row);
+			messages.scrollTop = messages.scrollHeight;
+		};
+
+		const startStatusPolling = () => {
+			if (!waitingTicketId || statusPollInterval) {
+				return;
+			}
+
+			statusPollInterval = setInterval(async () => {
+				try {
+					const statusResponse = await fetch(`/chatbot-reply-status?sessionId=${encodeURIComponent(sessionId)}&ticketId=${encodeURIComponent(waitingTicketId)}`);
+					if (!statusResponse.ok) {
+						return;
+					}
+
+					const statusData = await statusResponse.json();
+					if (statusData.status === 'answered' && statusData.reply) {
+						const replyKey = `${waitingTicketId}:${statusData.reply}`;
+						if (!shownHumanReplies.has(replyKey)) {
+							appendMessage('TripyGuys Support', statusData.reply);
+							shownHumanReplies.add(replyKey);
+						}
+
+						clearInterval(statusPollInterval);
+						statusPollInterval = null;
+						waitingTicketId = null;
+					}
+				} catch (error) {
+					// Keep polling; temporary network issues should not break status checks.
+				}
+			}, 5000);
+		};
+
+		const openChat = () => {
+			popup.classList.remove('d-none');
+			toggleButton.classList.add('d-none');
+			input.focus();
+		};
+
+		const closeChat = () => {
+			popup.classList.add('d-none');
+			toggleButton.classList.remove('d-none');
+		};
+
+		toggleButton.addEventListener('click', openChat);
+		closeButton.addEventListener('click', closeChat);
+
+		form.addEventListener('submit', async (event) => {
+			event.preventDefault();
+			const message = input.value.trim();
+
+			if (!message) {
+				return;
+			}
+
+			appendMessage('You', message);
+			input.value = '';
+
+			try {
+				const response = await fetch('/chatbot-message', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ message, sessionId })
+				});
+
+				const data = await response.json();
+				if (!response.ok) {
+					appendMessage('TripyGuys Chat Bot', data.error || 'Unable to reply right now.');
+					return;
+				}
+
+				appendMessage('TripyGuys Chat Bot', data.reply || 'Message received.');
+
+				if (data.status === 'waiting_for_human' && data.ticketId) {
+					waitingTicketId = String(data.ticketId);
+					appendMessage('TripyGuys Chat Bot', `Support ticket created: ${waitingTicketId}. Waiting for human reply...`);
+					startStatusPolling();
+				}
+			} catch (error) {
+				appendMessage('TripyGuys Chat Bot', 'Connection error. Please try again.');
+			}
+		});
+	})();
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
