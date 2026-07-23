@@ -349,6 +349,23 @@ app.get('/trips', checkAuthenticated, (req, res) => {
         sql += ' AND status = ?';
         params.push(status);
     }
+    
+    if (budgetRange === '0-1000') {
+        sql += ' AND budget BETWEEN ? AND ?';
+        params.push(0, 1000);
+    } else if (budgetRange === '1001-2000') {
+        sql += ' AND budget BETWEEN ? AND ?';
+        params.push(1001, 2000);
+    } else if (budgetRange === '2001-3000') {
+        sql += ' AND budget BETWEEN ? AND ?';
+        params.push(2001, 3000);
+    } else if (budgetRange === '3001-5000') {
+        sql += ' AND budget BETWEEN ? AND ?';
+        params.push(3001, 5000);
+    } else if (budgetRange === '5001-+') {
+        sql += ' AND budget >= ?';
+        params.push(5001);
+    }
 
     sql += ' ORDER BY startDate ASC';
 
@@ -496,6 +513,224 @@ app.post('/trips/:id/delete', checkAuthenticated, checkTripAccess, (req, res) =>
 
         req.flash('success', 'Trip deleted successfully.');
         return res.redirect(req.session.user.role === 'admin' ? '/admin/trips' : '/trips');
+    });
+});
+
+app.get('/community', checkAuthenticated, (req, res) => {
+
+    const destination = (req.query.destination || '').trim();
+
+    let sql = `
+        SELECT posts.*, users.username
+        FROM posts
+        JOIN users ON posts.userId = users.userId
+    `;
+    const params = [];
+
+    if (destination) {
+        sql += ' WHERE posts.destination LIKE ?';
+        params.push(`%${destination}%`);
+    }
+
+    sql += ' ORDER BY createdAt DESC';
+
+    connection.query(sql, params, (error, results) => {
+
+        if (error) {
+            console.error(error);
+            return res.status(500).send('Unable to load posts.');
+        }
+
+        res.render('community', {
+            posts: results,
+            destination
+        });
+    });
+});
+
+app.post('/community/add',
+    checkAuthenticated,
+    (req, res) => {
+
+        const {
+            title,
+            destination,
+            postContent
+        } = req.body;
+
+        const sql = `
+            INSERT INTO posts
+            (
+                userId,
+                title,
+                destination,
+                postContent
+            )
+            VALUES (?, ?, ?, ?)
+        `;
+
+        connection.query(
+            sql,
+            [
+                req.session.user.userId,
+                title,
+                destination,
+                postContent
+            ],
+            (error) => {
+
+                if (error) {
+                    console.error(error);
+                    return res.status(500).send('Unable to add post.');
+                }
+
+                res.redirect('/community');
+
+            }
+        );
+
+    });
+
+app.get('/community/add', checkAuthenticated, (req, res) => {
+    res.render('addPost');
+});
+
+app.get('/community/:id', checkAuthenticated, (req, res) => {
+
+        const sql = `
+            SELECT posts.*, users.username
+            FROM posts
+            JOIN users ON posts.userId = users.userId
+            WHERE postId = ?
+        `;
+
+        connection.query(
+            sql,
+            [req.params.id],
+            (error, posts) => {
+
+                if (error || posts.length === 0) {
+                    return res.status(404).send('Post not found');
+                }
+
+                const commentSql = `
+                    SELECT comments.*, users.username
+                    FROM comments
+                    JOIN users ON comments.userId = users.userId
+                    WHERE postId = ?
+                    ORDER BY createdAt ASC
+                `;
+
+                connection.query(
+                    commentSql,
+                    [req.params.id],
+                    (commentError, comments) => {
+
+                        if (commentError) {
+                            console.error(commentError);
+                            return res.status(500).send('Unable to load comments.');
+                        }
+
+                        res.render('post', {
+                            post: posts[0],
+                            comments
+                        });
+                    }
+                );
+            }
+        );
+    });
+
+// Add a comment to a post
+app.post('/community/:id/comment', checkAuthenticated, (req, res) => {
+    const { comment } = req.body;
+
+    const sql = `
+        INSERT INTO comments (postId, userId, comment)
+        VALUES (?, ?, ?)
+    `;
+
+    connection.query(sql, [req.params.id, req.session.user.userId, comment], (error) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).send('Unable to add comment.');
+        }
+
+        res.redirect(`/community/${req.params.id}`);
+    });
+});
+
+app.post('/community/:id/vote', checkAuthenticated, (req, res) => {
+
+    const postId = req.params.id;
+    const userId = req.session.user.userId;
+    const { voteType } = req.body; // 'up' or 'down'
+
+    const checkSql = 'SELECT * FROM postVotes WHERE postId = ? AND userId = ?';
+
+    connection.query(checkSql, [postId, userId], (error, existingVotes) => {
+
+        if (error) {
+            console.error(error);
+            return res.status(500).send('Unable to process vote.');
+        }
+
+        // No previous vote — insert new one
+        if (existingVotes.length === 0) {
+            const column = voteType === 'up' ? 'thumbsUp' : 'thumbsDown';
+
+            const insertSql = 'INSERT INTO postVotes (postId, userId, voteType) VALUES (?, ?, ?)';
+            connection.query(insertSql, [postId, userId, voteType], (insertError) => {
+                if (insertError) {
+                    console.error(insertError);
+                    return res.status(500).send('Unable to process vote.');
+                }
+
+                const updateSql = `UPDATE posts SET ${column} = ${column} + 1 WHERE postId = ?`;
+                connection.query(updateSql, [postId], () => {
+                    res.redirect(`/community/${postId}`);
+                });
+            });
+
+        // Already voted the same way — remove the vote (toggle off)
+        } else if (existingVotes[0].voteType === voteType) {
+            const column = voteType === 'up' ? 'thumbsUp' : 'thumbsDown';
+
+            const deleteSql = 'DELETE FROM postVotes WHERE postId = ? AND userId = ?';
+            connection.query(deleteSql, [postId, userId], (deleteError) => {
+                if (deleteError) {
+                    console.error(deleteError);
+                    return res.status(500).send('Unable to process vote.');
+                }
+
+                const updateSql = `UPDATE posts SET ${column} = ${column} - 1 WHERE postId = ?`;
+                connection.query(updateSql, [postId], () => {
+                    res.redirect(`/community/${postId}`);
+                });
+            });
+
+        // Voted the opposite way before — switch the vote
+        } else {
+            const oldColumn = existingVotes[0].voteType === 'up' ? 'thumbsUp' : 'thumbsDown';
+            const newColumn = voteType === 'up' ? 'thumbsUp' : 'thumbsDown';
+
+            const updateVoteSql = 'UPDATE postVotes SET voteType = ? WHERE postId = ? AND userId = ?';
+            connection.query(updateVoteSql, [voteType, postId, userId], (updateError) => {
+                if (updateError) {
+                    console.error(updateError);
+                    return res.status(500).send('Unable to process vote.');
+                }
+
+                const updateCountsSql = `
+                    UPDATE posts
+                    SET ${oldColumn} = ${oldColumn} - 1, ${newColumn} = ${newColumn} + 1
+                    WHERE postId = ?
+                `;
+                connection.query(updateCountsSql, [postId], () => {
+                    res.redirect(`/community/${postId}`);
+                });
+            });
+        }
     });
 });
 
