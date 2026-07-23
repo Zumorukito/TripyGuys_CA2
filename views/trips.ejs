@@ -56,7 +56,10 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between gap-2">
                                 <h2 class="h5"><%= trip.tripName %></h2>
-                                <span class="badge text-bg-secondary align-self-start"><%= trip.status %></span>
+                            <span class="badge <%= trip.status === 'Planning' ? 'text-bg-warning' : trip.status === 'Confirmed' ?
+                                'text-bg-success' : trip.status === 'Completed' ? 'text-bg-primary' : trip.status === 'Cancelled' ?
+                                'text-bg-danger' : 'text-bg-secondary' %> align-self-start">
+                                <%= trip.status %></span>
                             </div>
                             <% if (isAdminView) { %>
                                 <p class="small text-secondary mb-1">Owner: <%= trip.username %></p>
