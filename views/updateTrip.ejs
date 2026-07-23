@@ -12,25 +12,25 @@
                 <div class="mb-3">
                     <label class="form-label fw-semibold" for="destination">Destination</label>
                     <div class="input-group">
-                        <input type="text" class="form-control" id="destination" name="destination" placeholder="e.g. Bali, Indonesia" autocomplete="off" required>
+                        <input type="text" class="form-control" id="destination" name="destination" value="<%= trip.destination %>" placeholder="e.g. Bali, Indonesia" autocomplete="off" required>
                         <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Countries
                         </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item">Brunei</a></li>
-                            <li><a class="dropdown-item">Cambodia</a></li>
-                            <li><a class="dropdown-item">Indonesia</a></li>
-                            <li><a class="dropdown-item">Japan</a></li>
-                            <li><a class="dropdown-item">Laos</a></li>
-                            <li><a class="dropdown-item">Malaysia</a></li>
-                            <li><a class="dropdown-item">Mongolia</a></li>
-                            <li><a class="dropdown-item">Myanmar</a></li>
-                            <li><a class="dropdown-item">Philippines</a></li>
-                            <li><a class="dropdown-item">Singapore</a></li>
-                            <li><a class="dropdown-item">South Korea</a></li>
-                            <li><a class="dropdown-item">Taiwan</a></li>
-                            <li><a class="dropdown-item">Thailand</a></li>
-                            <li><a class="dropdown-item">Vietnam</a></li>
+                        <ul class="dropdown-menu" id="countryDropdown">
+                            <li><a class="dropdown-item" href="#">Brunei</a></li>
+                            <li><a class="dropdown-item" href="#">Cambodia</a></li>
+                            <li><a class="dropdown-item" href="#">Indonesia</a></li>
+                            <li><a class="dropdown-item" href="#">Japan</a></li>
+                            <li><a class="dropdown-item" href="#">Laos</a></li>
+                            <li><a class="dropdown-item" href="#">Malaysia</a></li>
+                            <li><a class="dropdown-item" href="#">Mongolia</a></li>
+                            <li><a class="dropdown-item" href="#">Myanmar</a></li>
+                            <li><a class="dropdown-item" href="#">Philippines</a></li>
+                            <li><a class="dropdown-item" href="#">Singapore</a></li>
+                            <li><a class="dropdown-item" href="#">South Korea</a></li>
+                            <li><a class="dropdown-item" href="#">Taiwan</a></li>
+                            <li><a class="dropdown-item" href="#">Thailand</a></li>
+                            <li><a class="dropdown-item" href="#">Vietnam</a></li>
                         </ul>
                     </div>
                 </div>
@@ -60,7 +60,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-semibold" for="description">Description</label>
-                    <textarea class="form-control" id="description" name="description" rows="4" placeholder="e.g. A relaxing week exploring beaches, temples, and local food."></textarea>
+                    <textarea class="form-control" id="description" name="description" rows="4" placeholder="e.g. A relaxing week exploring beaches, temples, and local food."><%= trip.description %></textarea>
                 </div>
                 <div class="mb-4">
                     <label class="form-label" for="image">Replace trip image</label>
@@ -75,5 +75,14 @@
         </div>
     </div>
 </main>
+
+<script>
+    document.querySelectorAll('#countryDropdown .dropdown-item').forEach(item => {
+        item.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.getElementById('destination').value = this.textContent;
+        });
+    });
+</script>
 
 <%- include('partials/footer') %>
