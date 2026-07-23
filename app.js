@@ -36,7 +36,7 @@ connection.connect((err) => {
         console.error('Error connecting to MySQL:', err.message);
         return;
     }
-    console.log('Connected to TripMate MySQL database');
+    console.log('Connected to TripyGuys MySQL database');
 });
 
 app.set('view engine', 'ejs');
@@ -45,7 +45,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'tripmate-school-project-secret',
+    secret: process.env.SESSION_SECRET || 'tripyguys-ca2',
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 }
@@ -336,6 +336,7 @@ app.get('/logout', (req, res) => {
 app.get('/trips', checkAuthenticated, (req, res) => {
     const search = (req.query.search || '').trim();
     const status = (req.query.status || '').trim();
+    const budgetRange = (req.query.budgetRange || '').trim();
 
     let sql = 'SELECT * FROM trips WHERE userId = ?';
     const params = [req.session.user.userId];
@@ -349,7 +350,7 @@ app.get('/trips', checkAuthenticated, (req, res) => {
         sql += ' AND status = ?';
         params.push(status);
     }
-    
+
     if (budgetRange === '0-1000') {
         sql += ' AND budget BETWEEN ? AND ?';
         params.push(0, 1000);
@@ -375,7 +376,7 @@ app.get('/trips', checkAuthenticated, (req, res) => {
             return res.status(500).send('Unable to load trips.');
         }
 
-        res.render('trips', { trips: results, search, status, isAdminView: false });
+        res.render('trips', { trips: results, search, status, budgetRange, isAdminView: false });
     });
 });
 
@@ -735,5 +736,5 @@ app.post('/community/:id/vote', checkAuthenticated, (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`TripMate is running at http://localhost:${PORT}`);
+    console.log(`TripyGuys is running at http://localhost:${PORT}`);
 });
